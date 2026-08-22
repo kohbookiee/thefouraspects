@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css?v=55" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div id="frame-grid" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div id="loading" hidden>Loading..</div>
+    <header id="site-title">
+      <h1 class="ui-ink">
+        <span>四</span><span>面</span>
+        <span>觀</span><span>相</span>
+        <span class="title-tail">體</span>
+      </h1>
+      <p id="site-subtitle" class="ui-ink">The Four Aspects</p>
+    </header>
+    <div id="circle-actions">
+      <button id="refresh" class="circle-btn" type="button" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M19.4 7.4A8 8 0 1 0 21 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M15.2 7.4h5.6M18.6 4.4 21.2 7.4 18.6 10.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="download" class="circle-btn" type="button" aria-label="Download">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 4v10.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M7.6 10.2 12 14.6l4.4-4.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5.5 17.2v2.2c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="archive-open" class="circle-btn" type="button" aria-label="Archive">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M4.2 8.3c0-.8.6-1.4 1.4-1.4h5l1.2-1.5c.2-.3.5-.4.8-.4h2.8c.3 0 .6.2.7.5l.3 1.4H18.4c.8 0 1.4.6 1.4 1.4v9.1c0 .8-.6 1.4-1.4 1.4H5.6c-.8 0-1.4-.6-1.4-1.4V8.3z"/>
+        </svg>
+      </button>
+    </div>
+    <div id="slider-dock">
+      <img id="save-thumb" alt="" hidden />
+      <div id="sliders"></div>
+    </div>
+    <div id="judgment-code" class="ui-ink"></div>
+    <div id="toast" hidden>SAVED TO ARCHIVE</div>
+    <section id="archive" hidden>
+      <div id="archive-inner">
+        <p id="archive-empty">NO SAVED FRIENDS</p>
+        <div id="archive-grid"></div>
+      </div>
+    </section>
+    <form id="mail-pop" hidden>
+      <p>Like your new friend?</p>
+      <h2>Send it to my E-Mail</h2>
+      <div id="mail-row">
+        <input id="mail-input" type="email" name="email" required placeholder="Your E-Mail Address" autocomplete="email" />
+        <button id="mail-send" type="submit">Send!</button>
+      </div>
+    </form>
+    <script type="module" src="app.js?v=55"></script>
+  </body>
+</html>
