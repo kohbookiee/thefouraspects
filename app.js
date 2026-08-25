@@ -65,7 +65,7 @@ const mailSend = document.getElementById("mail-send");
 const loadingEl = document.getElementById("loading");
 let mailRecord = null;
 const ARCHIVE_KEY = "faceJudgmentArchive";
-const ARCHIVE_GEN = "archive-v3";
+const ARCHIVE_GEN = "archive-v4";
 if (localStorage.getItem("faceJudgmentArchiveGen") !== ARCHIVE_GEN) {
   localStorage.removeItem(ARCHIVE_KEY);
   localStorage.setItem("faceJudgmentArchiveGen", ARCHIVE_GEN);
@@ -86,6 +86,9 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setClearColor(0xffffff, 1);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.toneMappingExposure = 1;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -95,16 +98,21 @@ controls.minDistance = 5;
 controls.maxDistance = 22;
 controls.target.set(0, 1.6, 0);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+scene.add(new THREE.AmbientLight(0xffffff, 1.35));
 
-const key = new THREE.DirectionalLight(0xffffff, 1.15);
+const key = new THREE.DirectionalLight(0xffffff, 0.4);
 key.position.set(4, 8, 5);
 key.castShadow = true;
+key.shadow.radius = 8;
 scene.add(key);
 
-const fill = new THREE.DirectionalLight(0xffffff, 0.35);
+const fill = new THREE.DirectionalLight(0xffffff, 0.95);
 fill.position.set(-5, 2, -3);
 scene.add(fill);
+
+const rim = new THREE.DirectionalLight(0xffffff, 0.35);
+rim.position.set(0, 3, -6);
+scene.add(rim);
 
 const group = new THREE.Group();
 scene.add(group);
@@ -206,13 +214,13 @@ uniform float uGradeAmount;`
   vec3 tint = uGradeTint;
   float tintLuma = max(dot(tint, vec3(0.2126, 0.7152, 0.0722)), 1e-4);
   vec3 recolored = tint * (luma / tintLuma);
-  float mixAmt = mix(0.52, 0.12, uGradeAmount);
+  float mixAmt = mix(0.1, 0.06, uGradeAmount);
   diffuseColor.rgb = mix(base, recolored, mixAmt);
-  diffuseColor.rgb *= mix(0.68, 1.06, uGradeAmount);
+  diffuseColor.rgb *= mix(1.08, 1.12, uGradeAmount);
   vec2 suv = vMapUv;
   float edge = max(max(1.0 - smoothstep(0.0, 0.008, suv.x), 1.0 - smoothstep(0.0, 0.008, suv.y)),
     max(1.0 - smoothstep(0.0, 0.008, 1.0 - suv.x), 1.0 - smoothstep(0.0, 0.008, 1.0 - suv.y)));
-  diffuseColor.rgb *= 1.0 - edge * 0.12;
+  diffuseColor.rgb *= 1.0 - edge * 0.04;
 }
 #endif`
       );
@@ -373,11 +381,9 @@ function sideMaterial(color) {
 
 function mappedMaterial(imagePath, priority = "low") {
   const map = loadFaceMap(imagePath, priority);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xc4a080,
+  const material = new THREE.MeshLambertMaterial({
+    color: 0xffffff,
     map: map.image ? map : null,
-    roughness: 0.55,
-    metalness: 0.02,
   });
   attachGrade(material);
   if (!map.image) map.readyMaterials.push(material);
@@ -409,7 +415,7 @@ const state = COLORS.map((color, index) => {
   }
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), materials);
   mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  mesh.receiveShadow = false;
   group.add(mesh);
 
   const meta = SLIDER_META[index];
@@ -584,11 +590,40 @@ archiveOpenButton.addEventListener("click", () => {
   else showBuilder();
 });
 const siteTitle = document.getElementById("site-title");
+const aboutPop = document.getElementById("about-pop");
+const aboutCard = document.getElementById("about-card");
+
+const aboutClose = document.getElementById("about-close");
+
+function showAbout() {
+  if (document.body.classList.contains("archive-open")) return;
+  document.body.classList.add("about-open");
+  if (aboutPop) aboutPop.hidden = false;
+}
+
+function hideAbout() {
+  document.body.classList.remove("about-open");
+  if (aboutPop) aboutPop.hidden = true;
+}
+
 if (siteTitle) {
-  siteTitle.addEventListener("click", () => {
-    if (document.body.classList.contains("archive-open")) showBuilder();
+  siteTitle.addEventListener("click", (event) => {
+    if (document.body.classList.contains("archive-open")) {
+      showBuilder();
+      return;
+    }
+    event.preventDefault();
+    if (document.body.classList.contains("about-open")) hideAbout();
+    else showAbout();
   });
 }
+if (aboutClose) aboutClose.addEventListener("click", (event) => {
+  event.stopPropagation();
+  hideAbout();
+});
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideAbout();
+});
 if (archiveView) {
   archiveView.addEventListener("click", (event) => {
     if (event.target.closest(".archive-card")) return;
@@ -604,6 +639,9 @@ window.addEventListener("pageshow", () => {
 });
 window.addEventListener("resize", resize);
 resize();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => alignTitleTops());
+}
 requestAnimationFrame(() => {
   updateViewScale();
   placeSliderDock(false);
@@ -746,24 +784,23 @@ function planCanvas(record, liveImages = []) {
   ];
   const maxW = Math.max(...cubes.map((cube) => cube.width), 0.001);
   const totalH = cubes.reduce((sum, cube) => sum + cube.height, 0) || 1;
-  const scale = Math.min(640 / maxW, 640 / totalH);
+  const frameW = 640;
+  const frameH = 640;
+  const pad = 28;
+  const scale = Math.min((frameW - pad * 2) / maxW, (frameH - pad * 2) / totalH);
   const stackW = maxW * scale;
   const stackH = totalH * scale;
-  const pad = 2;
   const canvas2d = document.createElement("canvas");
-  canvas2d.width = Math.max(1, Math.ceil(stackW + pad * 2));
-  canvas2d.height = Math.max(1, Math.ceil(stackH + pad * 2));
+  canvas2d.width = frameW;
+  canvas2d.height = frameH;
   const ctx = canvas2d.getContext("2d", { willReadFrequently: true });
-  const originX = pad;
-  const originY = pad;
+  const originX = (frameW - stackW) / 2;
+  const originY = (frameH - stackH) / 2;
   const paths = record.faceImages || [];
   const amount = record.gradeAmount ?? record.color?.gradeAmount ?? 0;
-  const mixAmt = record.colorMix ?? record.color?.mixAmount ?? 0.52 + (0.12 - 0.52) * amount;
-  const brightness = record.colorBrightness ?? record.color?.brightness ?? 0.68 + (1.06 - 0.68) * amount;
+  const mixAmt = record.colorMix ?? record.color?.mixAmount ?? 0.1 + (0.06 - 0.1) * amount;
+  const brightness = record.colorBrightness ?? record.color?.brightness ?? 1.08 + (1.12 - 1.08) * amount;
   const tint = record.tintColor || record.color?.tintColor || "#8D5145";
-
-  ctx.strokeStyle = "rgba(26, 29, 36, 0.22)";
-  ctx.lineWidth = 2;
 
   let y = originY;
   cubes.forEach((cube, index) => {
@@ -778,7 +815,6 @@ function planCanvas(record, liveImages = []) {
       ctx.fillStyle = tint;
       ctx.fillRect(x, y, w, h);
     }
-    ctx.strokeRect(x, y, w, h);
     y += h;
   });
 
@@ -800,8 +836,8 @@ function snapshotRecord() {
   const visible = currentVisibleFaces();
   const tintColor = linearRgbToHex(gradeUniforms.tint.value);
   const gradeAmount = grade.current;
-  const colorMix = 0.52 + (0.12 - 0.52) * gradeAmount;
-  const colorBrightness = 0.68 + (1.06 - 0.68) * gradeAmount;
+  const colorMix = 0.1 + (0.06 - 0.1) * gradeAmount;
+  const colorBrightness = 1.08 + (1.12 - 1.08) * gradeAmount;
   const record = {
     id: crypto.randomUUID ? crypto.randomUUID() : `archive-${Date.now()}`,
     createdAt,
@@ -863,8 +899,8 @@ function outlineFromPlan(src) {
         for (let x = 0; x < w; x += 1) {
           if (alpha(x, y) < 40) continue;
           let edge = false;
-          for (let dy = -2; dy <= 2 && !edge; dy += 1) {
-            for (let dx = -2; dx <= 2 && !edge; dx += 1) {
+          for (let dy = -1; dy <= 1 && !edge; dy += 1) {
+            for (let dx = -1; dx <= 1 && !edge; dx += 1) {
               if (dx === 0 && dy === 0) continue;
               if (alpha(x + dx, y + dy) < 40) edge = true;
             }
@@ -922,6 +958,9 @@ function renderArchive() {
     shot.className = "archive-shot";
     const img = document.createElement("img");
     img.alt = "";
+    img.style.width = "100%";
+    img.style.height = "auto";
+    img.style.maxWidth = "100%";
     shot.append(img);
     const meta = document.createElement("div");
     meta.className = "archive-meta";
@@ -1009,16 +1048,30 @@ function planBlob(record) {
   });
 }
 
+async function recordPngFile(record) {
+  if (record.planImage && record.planImage.startsWith("data:")) {
+    const blob = await (await fetch(record.planImage)).blob();
+    return new File([blob], pngFileName(record), { type: "image/png" });
+  }
+  const blob = (await planBlob(record)) || new Blob([], { type: "image/png" });
+  return new File([blob], pngFileName(record), { type: "image/png" });
+}
+
+function mailFieldMap(record) {
+  const code = record.judgmentCode || "";
+  return {
+    _subject: `Your new friend ${code}`,
+    _template: "box",
+    name: "四面觀相體",
+    judgmentCode: code,
+    message: `Here is your new friend.\n${code}`,
+  };
+}
+
 async function sendRecordToEmail(email, record) {
   if (!record) throw new Error("no save");
-  await ensurePlanImages(record);
-  const blob = (await planBlob(record)) || new Blob([]);
-  const file = new File([blob], pngFileName(record), { type: "image/png" });
   const body = new FormData();
-  body.append("_subject", `Your new friend ${record.judgmentCode || ""}`);
-  body.append("judgmentCode", record.judgmentCode || "");
-  body.append("message", "Here is your new friend.");
-  body.append("attachment", file);
+  Object.entries(mailFieldMap(record)).forEach(([name, value]) => body.append(name, value));
   const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
     method: "POST",
     headers: { Accept: "application/json" },
@@ -1081,6 +1134,7 @@ function hideMailPop() {
 }
 
 function showArchive() {
+  hideAbout();
   renderArchive();
   archiveView.hidden = false;
   document.body.classList.add("archive-open");
@@ -1112,11 +1166,57 @@ function saveToArchive() {
   return record;
 }
 
+function cropPlanPreview(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const pixels = ctx.getImageData(0, 0, w, h).data;
+      let minX = w;
+      let minY = h;
+      let maxX = 0;
+      let maxY = 0;
+      for (let y = 0; y < h; y += 1) {
+        for (let x = 0; x < w; x += 1) {
+          if (pixels[(y * w + x) * 4 + 3] < 16) continue;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+      if (maxX < minX) {
+        resolve(src);
+        return;
+      }
+      const pad = 10;
+      const sx = Math.max(0, minX - pad);
+      const sy = Math.max(0, minY - pad);
+      const sw = Math.min(w, maxX + pad + 1) - sx;
+      const sh = Math.min(h, maxY + pad + 1) - sy;
+      const out = document.createElement("canvas");
+      out.width = sw;
+      out.height = sh;
+      out.getContext("2d").drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+      resolve(out.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  });
+}
+
 async function downloadCurrent() {
   const record = saveToArchive();
   if (saveThumb && record.planImage) {
-    saveThumb.src = record.planImage;
+    saveThumb.src = await cropPlanPreview(record.planImage);
     saveThumb.hidden = false;
+    saveThumb.onload = () => placeSliderDock(false);
   }
   flashSaved();
 }
@@ -1137,7 +1237,7 @@ function placeSliderDock(move) {
   if (!sliderDock) return;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const w = Math.max(sliderDock.offsetWidth, 280);
+  const w = Math.max(sliderDock.offsetWidth, 340);
   const h = Math.max(sliderDock.offsetHeight, 160);
   const titleBox = document.getElementById("site-title");
   const actions = document.getElementById("circle-actions");
@@ -1184,19 +1284,32 @@ function updateViewScale() {
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const visibleH = 2 * Math.tan(vFov / 2) * dist;
   const visibleW = visibleH * Math.max(camera.aspect, 0.25);
-  const title = document.getElementById("site-title");
-  const topPx = title ? title.getBoundingClientRect().bottom : window.innerHeight * 0.2;
-  const botPx = judgmentCodeEl
-    ? judgmentCodeEl.getBoundingClientRect().top
-    : window.innerHeight * 0.82;
-  const usableH = THREE.MathUtils.clamp((botPx - topPx) / window.innerHeight, 0.32, 0.82);
-  const usableW = THREE.MathUtils.clamp(1 - 160 / window.innerWidth, 0.4, 0.86);
-  const widthScale = (visibleW * usableW * 0.78) / MAX_WIDTH;
-  const heightScale = (visibleH * usableH * 0.82) / (SIDE_AREA * 1.2);
-  viewScale = THREE.MathUtils.clamp(Math.min(widthScale, heightScale), 0.25, 2.6);
+  const defaultW = MIN_WIDTH + 0.5 * (MAX_WIDTH - MIN_WIDTH);
+  const slim = THREE.MathUtils.clamp((camera.aspect - 0.5) / 1.2, 0, 1);
+  const widthFrac = THREE.MathUtils.lerp(0.741, 0.363, slim);
+  const widthScale = (visibleW * widthFrac) / defaultW;
+  viewScale = THREE.MathUtils.clamp(widthScale, 0.25, 4.2);
   group.scale.setScalar(viewScale);
   controls.minDistance = 4.2 * viewScale;
   controls.maxDistance = 24 * Math.max(1, viewScale);
+}
+
+function alignTitleTops() {
+  const hanzi = document.querySelector("#site-title h1 span");
+  const sub = siteSubtitle;
+  if (!hanzi || !sub) return;
+  sub.style.transform = "none";
+  const topOf = (el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const rects = [...range.getClientRects()];
+    if (range.detach) range.detach();
+    if (!rects.length) return el.getBoundingClientRect().top;
+    return Math.min(...rects.map((rect) => rect.top));
+  };
+  const dy = topOf(hanzi) - topOf(sub);
+  if (Math.abs(dy) < 0.5) return;
+  sub.style.transform = `translateY(${Math.round(dy)}px)`;
 }
 
 function resize() {
@@ -1209,6 +1322,7 @@ function resize() {
   canvas.style.height = "100%";
   updateViewScale();
   placeSliderDock(false);
+  alignTitleTops();
   if (archiveView && !archiveView.hidden) fitArchiveCaptions();
 }
 

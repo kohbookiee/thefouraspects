@@ -7,32 +7,8 @@
 }
 
 @font-face {
-  font-family: "KaitouYokokuGothic";
-  src: url("fonts/KaitouYokokuGothic.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: "PP Editorial New";
   src: url("fonts/PPEditorialNew-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "SM3KMyungJo";
-  src: url("fonts/SM3KMyungJo.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "SM KMyungJo Std";
-  src: url("fonts/SMKMyungJoStd.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -129,16 +105,19 @@ body.hot #frame-grid {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  width: min(380px, calc(100vw - 32px));
+  gap: 10px;
   pointer-events: auto;
 }
 
 #save-thumb {
   display: block;
-  width: 72px;
+  width: 168px;
+  max-width: 100%;
   height: auto;
-  max-height: 88px;
+  max-height: 148px;
   object-fit: contain;
+  object-position: left bottom;
   background: transparent;
   pointer-events: none;
 }
@@ -148,27 +127,30 @@ body.hot #frame-grid {
 }
 
 #sliders {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 260px;
-  padding: 18px 20px;
-  border-radius: 15px;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 22px 28px 22px 24px;
+  border-radius: 18px;
   background: var(--panel);
 }
 
 .knob-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 19px;
+  min-width: 0;
 }
 
 .knob-wrap {
   --p: 50%;
   position: relative;
   flex: 1;
-  min-width: 140px;
-  height: 14px;
+  min-width: 0;
+  height: 17px;
   border-radius: 999px;
   background: linear-gradient(to right, #000000 0%, #7a7470 var(--p), #f4ece8 100%);
 }
@@ -178,8 +160,8 @@ body.hot .knob-wrap {
 }
 
 .knob-row label {
-  flex: 0 0 92px;
-  font: 15px/1.09 "PP Editorial New", serif;
+  flex: 0 0 110px;
+  font: 18px/1.09 "PP Editorial New", serif;
   color: var(--label);
   white-space: nowrap;
 }
@@ -198,6 +180,13 @@ body.hot .knob-wrap {
   pointer-events: none;
 }
 
+#site-title h1,
+#site-title #site-subtitle {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
 #site-title h1 {
   display: grid;
   flex: 0 0 auto;
@@ -210,7 +199,6 @@ body.hot .knob-wrap {
   font: 500 var(--hanzi)/1 "04HomuraM", serif;
   letter-spacing: 0;
   color: var(--ui);
-  transform: translateY(-10px);
 }
 
 #site-title h1 span {
@@ -237,6 +225,109 @@ body.hot .knob-wrap {
   text-transform: none;
   text-align: right;
   white-space: nowrap;
+}
+
+body:not(.archive-open) #site-title:hover h1,
+body:not(.archive-open) #site-title:hover #site-subtitle,
+body.about-open #site-title h1,
+body.about-open #site-title #site-subtitle {
+  color: #bababa;
+}
+
+#about-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8vh var(--margin);
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+#about-pop[hidden] {
+  display: none;
+}
+
+#about-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(720px, 100%);
+}
+
+#about-close {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+#about-close svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+#about-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 78vh;
+  overflow: auto;
+  padding: clamp(32px, 5vw, 56px);
+  border: 1px solid #000000;
+  border-radius: 28px;
+  background: #ffffff;
+  color: #000000;
+  text-align: left;
+}
+
+.about-head {
+  display: inline-block;
+  margin: 0 0 22px;
+  font: 600 15px/1.35 "Noto Sans KR", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.about-ko {
+  font: 600 clamp(14px, 1.6vw, 17px)/1.75 "Noto Sans KR", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.about-ko p,
+.about-en p {
+  margin: 0;
+}
+
+.about-ko p + p {
+  margin-top: 0.7em;
+}
+
+.about-en {
+  margin-top: 34px;
+  font: 400 clamp(12px, 1.35vw, 14px)/1.75 "SF Mono", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.08em;
+}
+
+.about-en p + p {
+  margin-top: 0.85em;
+}
+
+body.about-open #view,
+body.about-open #frame-grid,
+body.about-open #slider-dock,
+body.about-open #circle-actions,
+body.about-open #judgment-code {
+  filter: blur(14px);
 }
 
 #judgment-code {
@@ -274,15 +365,15 @@ body.hot .knob-wrap {
 }
 
 .knob::-webkit-slider-runnable-track {
-  height: 14px;
+  height: 17px;
   background: transparent;
 }
 
 .knob::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
   margin-top: -1px;
   border-radius: 50%;
   border: none;
@@ -291,7 +382,7 @@ body.hot .knob-wrap {
 }
 
 .knob::-moz-range-track {
-  height: 14px;
+  height: 17px;
   background: transparent;
   border: none;
 }
@@ -301,8 +392,8 @@ body.hot .knob-wrap {
 }
 
 .knob::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
   border: none;
   border-radius: 50%;
   background: #f3ece8;
@@ -320,6 +411,7 @@ body.hot .knob-wrap {
 }
 
 .circle-btn {
+  position: relative;
   width: var(--btn);
   height: var(--btn);
   padding: 0;
@@ -330,6 +422,14 @@ body.hot .knob-wrap {
   cursor: pointer;
   display: grid;
   place-items: center;
+  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.circle-btn:hover {
+  z-index: 1;
+  transform: scale(1.12);
+  background: #000000;
+  color: #ff0000;
 }
 
 .circle-btn svg {
@@ -339,19 +439,21 @@ body.hot .knob-wrap {
 }
 
 #mail-pop {
+  --mail-w: min(420px, calc(100vw - 2 * var(--margin)), 42vw);
   position: fixed;
-  right: var(--margin);
-  bottom: var(--margin);
+  right: max(12px, var(--margin));
+  bottom: max(12px, var(--margin));
   z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: min(420px, calc(100vw - 48px));
-  aspect-ratio: 4 / 3;
-  padding: 36px 32px 28px;
-  border-radius: 24px;
+  width: var(--mail-w);
+  max-width: calc(100vw - 24px);
+  aspect-ratio: 16 / 10;
+  padding: clamp(8px, 1.2vw, 16px) clamp(14px, 2.2vw, 32px);
+  border-radius: clamp(12px, 1.6vw, 24px);
   background: #000000;
   color: #ffffff;
   pointer-events: auto;
@@ -363,19 +465,19 @@ body.hot .knob-wrap {
 
 #mail-pop p {
   margin: 0;
-  font: 13px/1.3 "SF Mono", "Menlo", "Consolas", monospace;
+  font: clamp(10px, 1.05vw, 13px)/1.3 "SF Mono", "Menlo", "Consolas", monospace;
   text-align: center;
 }
 
 #mail-pop h2 {
-  margin: 8px 0 28px;
-  font: 400 clamp(22px, 4.2vw, 34px)/1.1 "PP Editorial New", serif;
+  margin: 4px 0 10px;
+  font: 400 clamp(16px, 2.8vw, 34px)/1.1 "PP Editorial New", serif;
   text-align: center;
 }
 
 #mail-row {
-  --bar: 52px;
-  --knob: 52px;
+  --bar: clamp(32px, 4vw, 52px);
+  --knob: clamp(32px, 4vw, 52px);
   position: relative;
   display: flex;
   align-items: center;
@@ -392,7 +494,7 @@ body.hot .knob-wrap {
   border-radius: 999px;
   background: #d3d3d3;
   color: #111111;
-  font: 12px/1 "SF Mono", "Menlo", "Consolas", monospace;
+  font: clamp(10px, 1vw, 12px)/1 "SF Mono", "Menlo", "Consolas", monospace;
   outline: none;
 }
 
@@ -412,7 +514,7 @@ body.hot .knob-wrap {
   transform: translateY(-50%);
   background: #ff0000;
   color: #ffffff;
-  font: 400 15px/1 "PP Editorial New", serif;
+  font: 400 clamp(12px, 1.2vw, 15px)/1 "PP Editorial New", serif;
   cursor: pointer;
 }
 
@@ -446,12 +548,12 @@ body.hot .knob-wrap {
 }
 
 #archive-inner {
+  --archive-gap: clamp(12px, 4vw, 88px);
   box-sizing: border-box;
   width: 80%;
   max-width: 80%;
   min-width: 0;
   margin: 0 auto;
-  overflow: hidden;
 }
 
 #archive-cols {
@@ -482,6 +584,11 @@ body.archive-open #site-title {
   cursor: pointer;
 }
 
+body.archive-open #site-title:hover h1,
+body.archive-open #site-title:hover #site-subtitle {
+  color: #000000;
+}
+
 #archive-empty {
   position: relative;
   z-index: 1;
@@ -495,23 +602,18 @@ body.archive-open #site-title {
 #archive-grid {
   position: relative;
   z-index: 1;
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: min(88px, 5vw);
-  row-gap: 48px;
+  gap: var(--archive-gap);
 }
 
 .archive-card {
-  display: grid;
-  justify-items: stretch;
-  align-content: start;
-  gap: 0;
-  width: 100%;
-  max-width: 100%;
+  box-sizing: border-box;
+  flex: 0 0 calc((100% - 3 * var(--archive-gap)) / 4);
+  width: calc((100% - 3 * var(--archive-gap)) / 4);
+  max-width: calc((100% - 3 * var(--archive-gap)) / 4);
   min-width: 0;
   padding: 0;
   overflow: hidden;
@@ -519,24 +621,21 @@ body.archive-open #site-title {
 }
 
 .archive-shot {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 100%;
-  max-width: 100%;
   min-width: 0;
-  overflow: hidden;
-  aspect-ratio: 3 / 4;
+  line-height: 0;
 }
 
 .archive-shot img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
   max-width: 100%;
   min-width: 0;
   object-fit: contain;
   object-position: center;
-  transition: filter 0.16s ease;
 }
 
 .archive-card.is-selected .archive-shot img {
@@ -544,25 +643,21 @@ body.archive-open #site-title {
 }
 
 .archive-meta {
-  display: grid;
+  display: none;
   gap: 2px;
   justify-items: center;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  margin-top: 0;
+  margin-top: 17px;
   overflow: hidden;
-  visibility: hidden;
-  opacity: 0;
   pointer-events: none;
 }
 
 .archive-card:hover .archive-meta,
 .archive-card.is-hover .archive-meta,
 .archive-card.is-selected .archive-meta {
-  margin-top: 5px;
-  visibility: visible;
-  opacity: 1;
+  display: grid;
 }
 
 .archive-code,
@@ -582,14 +677,23 @@ body.archive-open #site-title {
     --gutter: 12px;
   }
 
+  #slider-dock {
+    width: min(340px, calc(100vw - 32px));
+  }
+
   #sliders {
-    min-width: 220px;
-    padding: 12px 14px;
+    min-width: 0;
+    width: 100%;
+    padding: 16px 24px 16px 16px;
+  }
+
+  .knob-row {
+    gap: 12px;
   }
 
   .knob-row label {
-    flex-basis: 76px;
-    font-size: 13px;
+    flex-basis: 72px;
+    font-size: 14px;
   }
 }
 

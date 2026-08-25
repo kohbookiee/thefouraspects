@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css?v=55" />
+    <title>사면관상체四面觀相體</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=85" />
     <script type="importmap">
       {
         "imports": {
@@ -27,6 +34,26 @@
       </h1>
       <p id="site-subtitle" class="ui-ink">The Four Aspects</p>
     </header>
+    <div id="about-pop" hidden>
+      <div id="about-wrap">
+        <button id="about-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 5l14 14M19 5 5 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <article id="about-card">
+          <p class="about-head">《사면관상체》, The Four Aspects</p>
+          <div class="about-ko">
+            <p>인간은 타인의 얼굴을 바라보며 끊임없이 의미를 부여한다. 얼굴의 형태, 비율, 눈빛, 분위기는 어느 순간 한 사람의 성격과 가치, 미래를 판단하는 기준으로 변환된다. 관상은 이러한 욕망을 가장 오래된 방식으로 드러내는 하나의 체계이다.</p>
+            <p>《사면관상체》는 관상학적 시선을 차용해 타인을 분류하고 판단하려는 인간의 욕망을 드러낸다. 왜곡되고 재조합된 얼굴은 한 사람의 본질이 아닌, 자신의 기준과 편견이 투영된 하나의 표면에 가깝다.</p>
+          </div>
+          <div class="about-en">
+            <p>《The Four Aspects》 adopts the perspective of physiognomy to reveal the human desire to categorize and judge others.</p>
+            <p>The distorted and reconstructed face is not the essence of an individual, but rather a surface onto which one’s own standards and biases are projected.</p>
+          </div>
+        </article>
+      </div>
+    </div>
     <div id="circle-actions">
       <button id="refresh" class="circle-btn" type="button" aria-label="Refresh">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -67,6 +94,6 @@
         <button id="mail-send" type="submit">Send!</button>
       </div>
     </form>
-    <script type="module" src="app.js?v=55"></script>
+    <script type="module" src="app.js?v=84"></script>
   </body>
 </html>
