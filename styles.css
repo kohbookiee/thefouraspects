@@ -27,7 +27,7 @@
   --display: min(14.8vh, calc((100vw - 100px) / 11.2));
   --hanzi: var(--display);
   --code: min(14.8vh, calc(100vw / 15));
-  --btn: clamp(36px, 4.2vw, 54px);
+  --btn: clamp(41px, 4.83vw, 62px);
   --btn-gap: 10px;
 }
 
