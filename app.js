@@ -1062,21 +1062,6 @@ async function recordPngFile(record) {
   return new File([blob], mailPngFileName(record), { type: "image/png" });
 }
 
-function publicSiteBase() {
-  const { origin, pathname } = window.location;
-  const folder = pathname.replace(/[^/]+$/, "");
-  if (origin.includes("github.io") || (!origin.includes("127.0.0.1") && !origin.includes("localhost"))) {
-    return `${origin}${folder}`;
-  }
-  return "https://kohbookiee.github.io/thefouraspects/";
-}
-
-function wrapMailPhotoUrl(fileUrl) {
-  const page = new URL("photo.html", publicSiteBase());
-  page.searchParams.set("src", fileUrl);
-  return page.href;
-}
-
 function mailFieldMap(record, photoUrl = "") {
   const code = record.judgmentCode || "";
   const lines = [`Here is your new friend.`, code];
@@ -1103,7 +1088,7 @@ async function uploadMailPhoto(file) {
   const result = await response.json();
   const url = result?.data?.url;
   if (!url || result.status !== "success") throw new Error("upload");
-  return String(url).replace("tmpfiles.org/", "tmpfiles.org/dl/");
+  return String(url);
 }
 
 async function postFormSubmit(email, fields, file) {
@@ -1130,7 +1115,7 @@ async function sendRecordToEmail(email, record) {
   const file = await recordPngFile(record);
   let photoUrl = "";
   try {
-    photoUrl = wrapMailPhotoUrl(await uploadMailPhoto(file));
+    photoUrl = await uploadMailPhoto(file);
   } catch (error) {
     photoUrl = "";
   }
