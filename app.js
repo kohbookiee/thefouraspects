@@ -1088,7 +1088,9 @@ async function uploadMailPhoto(file) {
   const result = await response.json();
   const url = result?.data?.url;
   if (!url || result.status !== "success") throw new Error("upload");
-  return String(url);
+  const href = String(url);
+  if (href.includes("tmpfiles.org/dl/")) return href;
+  return href.replace("tmpfiles.org/", "tmpfiles.org/dl/");
 }
 
 async function postFormSubmit(email, fields, file) {

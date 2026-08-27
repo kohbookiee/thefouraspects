@@ -597,6 +597,11 @@ body.archive-open #site-title {
   cursor: pointer;
 }
 
+body.archive-open #site-title h1,
+body.archive-open #site-title #site-subtitle {
+  color: #ff0000;
+}
+
 body.archive-open #site-title:hover h1,
 body.archive-open #site-title:hover #site-subtitle {
   color: #000000;
