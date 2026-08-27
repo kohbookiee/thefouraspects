@@ -1057,21 +1057,56 @@ async function recordPngFile(record) {
   return new File([blob], pngFileName(record), { type: "image/png" });
 }
 
-function mailFieldMap(record) {
+function publicSiteBase() {
+  const { origin, pathname } = window.location;
+  const folder = pathname.replace(/[^/]+$/, "");
+  if (origin.includes("github.io") || (!origin.includes("127.0.0.1") && !origin.includes("localhost"))) {
+    return `${origin}${folder}`;
+  }
+  return "https://kohbookiee.github.io/thefouraspects/";
+}
+
+function wrapMailPhotoUrl(fileUrl) {
+  const page = new URL("photo.html", publicSiteBase());
+  page.searchParams.set("src", fileUrl);
+  return page.href;
+}
+
+function mailFieldMap(record, photoUrl = "") {
   const code = record.judgmentCode || "";
+  const lines = [`Here is your new friend.`, code];
+  if (photoUrl) lines.push("", "Photo:", photoUrl);
   return {
     _subject: `Your new friend ${code}`,
     _template: "box",
     name: "四面觀相體",
     judgmentCode: code,
-    message: `Here is your new friend.\n${code}`,
+    photoUrl,
+    message: lines.join("\n"),
   };
 }
 
-async function sendRecordToEmail(email, record) {
-  if (!record) throw new Error("no save");
+async function uploadMailPhoto(file) {
   const body = new FormData();
-  Object.entries(mailFieldMap(record)).forEach(([name, value]) => body.append(name, value));
+  body.append("file", file);
+  body.append("expire", "172800");
+  const response = await fetch("https://tmpfiles.org/api/v1/upload", {
+    method: "POST",
+    body,
+  });
+  if (!response.ok) throw new Error("upload");
+  const result = await response.json();
+  const url = result?.data?.url;
+  if (!url || result.status !== "success") throw new Error("upload");
+  return String(url).replace("tmpfiles.org/", "tmpfiles.org/dl/");
+}
+
+async function postFormSubmit(email, fields, file) {
+  const body = new FormData();
+  Object.entries(fields).forEach(([name, value]) => {
+    if (value) body.append(name, value);
+  });
+  if (file) body.append("attachment", file, file.name);
   const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
     method: "POST",
     headers: { Accept: "application/json" },
@@ -1081,6 +1116,25 @@ async function sendRecordToEmail(email, record) {
   const result = await response.json();
   if (result.success === false || result.success === "false") {
     throw new Error(result.message || "fail");
+  }
+}
+
+async function sendRecordToEmail(email, record) {
+  if (!record) throw new Error("no save");
+  await ensurePlanImages(record);
+  const file = await recordPngFile(record);
+  let photoUrl = "";
+  try {
+    photoUrl = wrapMailPhotoUrl(await uploadMailPhoto(file));
+  } catch (error) {
+    photoUrl = "";
+  }
+  const fields = mailFieldMap(record, photoUrl);
+  try {
+    await postFormSubmit(email, fields, file);
+  } catch (error) {
+    if (!photoUrl) throw error;
+    await postFormSubmit(email, fields, null);
   }
 }
 
@@ -1237,8 +1291,8 @@ function placeSliderDock(move) {
   if (!sliderDock) return;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const w = Math.max(sliderDock.offsetWidth, 340);
-  const h = Math.max(sliderDock.offsetHeight, 160);
+  const w = Math.max(sliderDock.offsetWidth, 280);
+  const h = Math.max(sliderDock.offsetHeight, 140);
   const titleBox = document.getElementById("site-title");
   const actions = document.getElementById("circle-actions");
   const codeBox = judgmentCodeEl ? judgmentCodeEl.getBoundingClientRect() : null;

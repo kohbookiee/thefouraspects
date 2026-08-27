@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>사면관상체四面觀相體</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #ff0000;
+      }
+      body {
+        display: grid;
+        place-items: center;
+      }
+      img {
+        display: block;
+        max-width: min(92vw, 640px);
+        max-height: 92vh;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <img alt="" />
+    <script>
+      const raw = new URLSearchParams(location.search).get("src") || "";
+      let src = "";
+      try {
+        const url = new URL(raw);
+        if (url.protocol === "https:" && url.hostname.endsWith("tmpfiles.org")) src = url.href;
+      } catch (error) {}
+      if (src) document.querySelector("img").src = src;
+    </script>
+  </body>
+</html>

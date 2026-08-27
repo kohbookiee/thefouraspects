@@ -27,8 +27,8 @@
   --display: min(14.8vh, calc((100vw - 100px) / 11.2));
   --hanzi: var(--display);
   --code: min(14.8vh, calc(100vw / 15));
-  --btn: clamp(62px, calc(var(--display) * 0.54), 91px);
-  --btn-gap: 14px;
+  --btn: clamp(36px, 4.2vw, 54px);
+  --btn-gap: 10px;
 }
 
 * {
@@ -261,8 +261,8 @@ body.about-open #site-title #site-subtitle {
 }
 
 #about-close {
-  width: 36px;
-  height: 36px;
+  width: var(--btn);
+  height: var(--btn);
   padding: 0;
   border: none;
   background: none;
@@ -439,7 +439,7 @@ body.about-open #judgment-code {
 }
 
 #mail-pop {
-  --mail-w: min(420px, calc(100vw - 2 * var(--margin)), 42vw);
+  --mail-w: min(420px, calc(100vw - 2 * var(--margin)));
   position: fixed;
   right: max(12px, var(--margin));
   bottom: max(12px, var(--margin));
@@ -451,8 +451,8 @@ body.about-open #judgment-code {
   box-sizing: border-box;
   width: var(--mail-w);
   max-width: calc(100vw - 24px);
-  aspect-ratio: 16 / 10;
-  padding: clamp(8px, 1.2vw, 16px) clamp(14px, 2.2vw, 32px);
+  min-height: 0;
+  padding: 28px 28px 32px;
   border-radius: clamp(12px, 1.6vw, 24px);
   background: #000000;
   color: #ffffff;
@@ -464,24 +464,24 @@ body.about-open #judgment-code {
 }
 
 #mail-pop p {
-  margin: 0;
+  margin: 0 0 18px;
   font: clamp(10px, 1.05vw, 13px)/1.3 "SF Mono", "Menlo", "Consolas", monospace;
   text-align: center;
 }
 
 #mail-pop h2 {
-  margin: 4px 0 10px;
-  font: 400 clamp(16px, 2.8vw, 34px)/1.1 "PP Editorial New", serif;
+  margin: 0 0 28px;
+  font: 400 clamp(22px, 2.8vw, 34px)/1.1 "PP Editorial New", serif;
   text-align: center;
 }
 
 #mail-row {
-  --bar: clamp(32px, 4vw, 52px);
-  --knob: clamp(32px, 4vw, 52px);
+  --bar: var(--btn);
+  --knob: var(--btn);
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 78%;
   height: var(--knob);
 }
 
@@ -489,7 +489,7 @@ body.about-open #judgment-code {
   box-sizing: border-box;
   width: 100%;
   height: var(--bar);
-  padding: 0 calc(var(--knob) * 0.78) 0 18px;
+  padding: 0 calc(var(--knob) + 10px) 0 16px;
   border: none;
   border-radius: 999px;
   background: #d3d3d3;
@@ -516,11 +516,24 @@ body.about-open #judgment-code {
   color: #ffffff;
   font: 400 clamp(12px, 1.2vw, 15px)/1 "PP Editorial New", serif;
   cursor: pointer;
+  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+#mail-send:hover {
+  transform: translateY(-50%) scale(1.12);
+  background: #ffffff;
+  color: #ff0000;
 }
 
 #mail-send:disabled {
   opacity: 0.55;
   cursor: wait;
+}
+
+#mail-send:disabled:hover {
+  transform: translateY(-50%);
+  background: #ff0000;
+  color: #ffffff;
 }
 
 #toast {
@@ -678,22 +691,43 @@ body.archive-open #site-title:hover #site-subtitle {
   }
 
   #slider-dock {
-    width: min(340px, calc(100vw - 32px));
+    width: min(306px, calc(100vw - 32px));
   }
 
   #sliders {
     min-width: 0;
     width: 100%;
-    padding: 16px 24px 16px 16px;
+    gap: 12px;
+    padding: 16px 22px 16px 14px;
+    border-radius: 16px;
   }
 
   .knob-row {
-    gap: 12px;
+    gap: 11px;
   }
 
   .knob-row label {
-    flex-basis: 72px;
-    font-size: 14px;
+    flex-basis: 65px;
+    font-size: 13px;
+  }
+
+  #mail-pop {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: min(360px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    padding: 28px 22px 32px;
+    transform: translate(-50%, -50%);
+  }
+
+  #mail-row {
+    width: 92%;
+  }
+
+  #mail-input {
+    font-size: 11px;
   }
 }
 
