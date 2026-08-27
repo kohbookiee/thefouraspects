@@ -577,8 +577,7 @@ body.archive-open #view,
 body.archive-open #slider-dock,
 body.archive-open #judgment-code,
 body.archive-open #frame-grid,
-body.archive-open #loading,
-body.archive-open #circle-actions {
+body.archive-open #loading {
   visibility: hidden;
   pointer-events: none;
 }
@@ -588,7 +587,9 @@ body.archive-open #frame-grid {
 }
 
 body.archive-open #circle-actions {
-  display: none;
+  z-index: 6;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 body.archive-open #site-title {
