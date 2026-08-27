@@ -18,23 +18,46 @@
         place-items: center;
       }
       img {
-        display: block;
+        display: none;
         max-width: min(92vw, 640px);
         max-height: 92vh;
         object-fit: contain;
       }
+      img.is-on {
+        display: block;
+      }
     </style>
   </head>
   <body>
-    <img alt="" />
+    <img alt="" referrerpolicy="no-referrer" />
     <script>
       const raw = new URLSearchParams(location.search).get("src") || "";
-      let src = "";
+      const img = document.querySelector("img");
+      const tried = new Set();
+      const list = [];
+      const add = (href) => {
+        if (!href || tried.has(href)) return;
+        tried.add(href);
+        list.push(href);
+      };
       try {
         const url = new URL(raw);
-        if (url.protocol === "https:" && url.hostname.endsWith("tmpfiles.org")) src = url.href;
+        if (url.protocol === "https:" && url.hostname.endsWith("tmpfiles.org")) {
+          add(url.href);
+          if (url.pathname.startsWith("/dl/")) {
+            add(`${url.origin}${url.pathname.replace(/^\/dl/, "")}${url.search}`);
+          } else {
+            add(`${url.origin}/dl${url.pathname}${url.search}`);
+          }
+        }
       } catch (error) {}
-      if (src) document.querySelector("img").src = src;
+      let i = 0;
+      img.onload = () => img.classList.add("is-on");
+      img.onerror = () => {
+        i += 1;
+        if (i < list.length) img.src = list[i];
+      };
+      if (list[0]) img.src = list[0];
     </script>
   </body>
 </html>

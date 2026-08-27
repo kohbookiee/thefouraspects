@@ -1025,6 +1025,11 @@ function pngFileName(record) {
   return `${code.replace(/[/\\?%*:|"<>]/g, "")}.png`;
 }
 
+function mailPngFileName(record) {
+  const name = pngFileName(record).replace(/[^A-Za-z0-9._-]+/g, "-").replace(/-+/g, "-");
+  return name.replace(/^-|-$/g, "") || "friend.png";
+}
+
 async function downloadArchivePng(record) {
   await ensurePlanImages(record);
   await new Promise((resolve) => {
@@ -1051,10 +1056,10 @@ function planBlob(record) {
 async function recordPngFile(record) {
   if (record.planImage && record.planImage.startsWith("data:")) {
     const blob = await (await fetch(record.planImage)).blob();
-    return new File([blob], pngFileName(record), { type: "image/png" });
+    return new File([blob], mailPngFileName(record), { type: "image/png" });
   }
   const blob = (await planBlob(record)) || new Blob([], { type: "image/png" });
-  return new File([blob], pngFileName(record), { type: "image/png" });
+  return new File([blob], mailPngFileName(record), { type: "image/png" });
 }
 
 function publicSiteBase() {
@@ -1090,7 +1095,7 @@ async function uploadMailPhoto(file) {
   const body = new FormData();
   body.append("file", file);
   body.append("expire", "172800");
-  const response = await fetch("https://tmpfiles.org/api/v1/upload", {
+  const response = await fetch("https://tmpfiles.org/api/v1/upload?expire=172800", {
     method: "POST",
     body,
   });
